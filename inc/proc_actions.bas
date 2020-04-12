@@ -1,0 +1,93 @@
+rem -----------------------
+rem -- routines that handle
+rem -- take off, landing, 
+rem -- refueling
+rem -----------------------
+
+proc actions
+
+  dim anim_counter!
+  dim altitude_delta
+  
+  on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving
+  
+  taxi:
+    rem -- decrease fuel
+    if \frame_count! & %01111111 = 0 then
+      dec \fuel!
+      gosub erase_fuel
+    endif
+    rem -- check if autopilot should take over
+    if \aircraft_altitude >= 740 and \aircraft_altitude <= 848 then
+      if \speed! < 72 then
+        if \dir! = 1 then
+          if \aircraft_xpos >= 4448 and \aircraft_xpos <= 4512 then goto start_landing
+        else
+          if \aircraft_xpos >= 4768 and \aircraft_xpos <= 4832 then goto start_landing
+        endif
+      endif
+    endif
+    return
+    
+  start_landing:
+    anim_counter! = 0
+    \aircraft_mode! = \AIRCRAFT_MODE_LANDING!
+    textat 14, 12, "on autopilot"
+    return
+    
+  refuel:
+    if \frame_count! & %00000111 = 0 then
+      inc \fuel!
+      gosub draw_fuel
+      if \fuel! >= 32 then
+        \speed! = 48
+        anim_counter! = 0
+        \aircraft_mode! = \AIRCRAFT_MODE_TAKE_OFF!
+        textat 14, 12, "on autopilot"
+      endif
+    endif
+    return
+    
+  take_off:
+    inc anim_counter!
+    \speed! = rshift!(anim_counter!, 1)
+    if anim_counter! > 100 then
+      \lifting! = 1
+      dec \aircraft_altitude
+    endif
+    if anim_counter! = 160 then
+      memset $05ed, 13, 32
+      \aircraft_mode! = \AIRCRAFT_MODE_TAXI!
+    endif
+    return
+    
+  landing:
+    if abs(\aircraft_xpos - 4640) > 8 then
+      if \speed! > 48 then dec \speed!
+      if \aircraft_altitude < 848 then inc \aircraft_altitude : inc \aircraft_altitude
+    else
+      \speed! = 0
+      \aircraft_mode! = \AIRCRAFT_MODE_REFUEL!
+      textat 14, 12, " refueling  "
+    endif
+    return
+  
+  nosediving:
+    \aircraft_altitude = \aircraft_altitude - 4
+    return
+  
+  draw_fuel:
+    offset! = rshift!(\fuel!, 2)
+    if offset! = 0 then return
+    poke 1065 + offset!, $3b
+    poke 1105 + offset!, $a0
+    poke 1145 + offset!, $3c
+    return
+    
+  erase_fuel:
+    offset! = rshift!(\fuel!, 2)
+    poke 1066 + offset!, $20
+    poke 1106 + offset!, $20
+    poke 1146 + offset!, $20
+    return
+endproc
