@@ -1,6 +1,6 @@
 proc logo
   
-  poke \VIC_CONTROL2, \VIC_CTR_HIRES!
+  poke \VIC_CONTROL2, %11001100
   
   memset \SCREEN, 1000, 32
   memset \COLOR, 1000, 15
@@ -53,13 +53,15 @@ proc logo
   
   gosub calculate_ufo_paths
   
-  for i = 0 to 250
+  for i = 0 to 200
     watch \RASTER_POS, 0
   next i
   
   for j! = 0 to 6
     spr_disable j!
   next j!
+  
+  poke \VIC_CONTROL2, %11001000
   
   textat 16, 13, "       "
   textat 14, 10, "their first"
@@ -72,7 +74,6 @@ proc logo
   return
   
   calculate_ufo_paths:
-    radar_pos = 1076
     for path_no! = 0 to 12
       x = path_start[path_no!]
       index! = 0
@@ -92,12 +93,16 @@ proc logo
         x = x + 3
         gosub add_to_attack_wave
       next y!
-      for j! = 0 to 3
-        \attack_wave_radar_pos[j!, path_no!] = radar_pos
-        radar_pos = radar_pos + 40
-      next j!
-      radar_pos = radar_pos + 79
+      for jj = 0 to 9
+        jindex = lshift(jj, 4)
+        mpos_x! = cast!(\attack_wave_x[jindex, path_no!] / 160)
+        mpos_y! = (\attack_wave_y![jindex, path_no!] - 84) / 24
+        \attack_wave_radar_pos[jj, path_no!] = 1074 + 40 * cast(rshift!(mpos_y!)) + cast(rshift!(mpos_x!))
+        shape! = 180 + (mpos_x! & %00000001) + lshift!(mpos_y! & %00000001)
+        \attack_wave_radar_shape![jj, path_no!] = shape!
+      next jj
     next path_no!
+    
     return
     
     add_to_attack_wave:

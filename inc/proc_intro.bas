@@ -4,6 +4,8 @@ proc intro
     call logo
   endif
 
+  call configure_sprites
+  
   \first_run! = 0
   
   poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) & %11101111
@@ -96,7 +98,6 @@ proc intro
       
       ''if aircraft_dir = 2 then
       spr_setshape 6, landing_bacon_anim![landing_bacon_animphase!]
-    
     endif
   
     if animphase! = 250 and aircraft_dir = 0 then aircraft_dir = 1
@@ -113,7 +114,7 @@ proc intro
         endif
       endif
     endif
-    
+        
     inc animphase!
     if joy_1_fire!() = 0 then goto wait_loop
     

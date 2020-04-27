@@ -18,7 +18,7 @@ proc actions
       gosub erase_fuel
     endif
     rem -- check if autopilot should take over
-    if \aircraft_altitude >= 740 and \aircraft_altitude <= 848 then
+    if \aircraft_altitude >= 780 and \aircraft_altitude <= 848 then
       if \speed! < 72 then
         if \dir! = 1 then
           if \aircraft_xpos >= 4448 and \aircraft_xpos <= 4512 then goto start_landing
@@ -32,43 +32,53 @@ proc actions
   start_landing:
     anim_counter! = 0
     \aircraft_mode! = \AIRCRAFT_MODE_LANDING!
-    textat 14, 12, "on autopilot"
+    textat 14, 12, " on autopilot "
     return
     
   refuel:
+    spr_setshape 7, 194 + \dir! * 27
     if \frame_count! & %00000111 = 0 then
       inc \fuel!
       gosub draw_fuel
       if \fuel! >= 32 then
+        ''poke \SID_CTRL2, %00100000
         \speed! = 48
         anim_counter! = 0
         \aircraft_mode! = \AIRCRAFT_MODE_TAKE_OFF!
-        textat 14, 12, "on autopilot"
+        textat 14, 12, " on autopilot "
       endif
     endif
     return
     
   take_off:
     inc anim_counter!
-    \speed! = rshift!(anim_counter!, 1)
-    if anim_counter! > 100 then
+    \speed! = rshift!(anim_counter!, 2) + 48 
+    if anim_counter! = 30 then spr_setshape 7, 193 + \dir! * 27
+    if anim_counter! = 50 then spr_setshape 7, 192 + \dir! * 27
+    if anim_counter! > 30 then
       \lifting! = 1
-      dec \aircraft_altitude
+      dec \aircraft_altitude : dec \aircraft_altitude
     endif
-    if anim_counter! = 160 then
-      memset $05ed, 13, 32
+    if anim_counter! = 70 then
+      memset $05ed, 14, 32
       \aircraft_mode! = \AIRCRAFT_MODE_TAXI!
     endif
     return
     
   landing:
     if abs(\aircraft_xpos - 4640) > 8 then
+      spr_setshape 7, 193 + \dir! * 27
       if \speed! > 48 then dec \speed!
-      if \aircraft_altitude < 848 then inc \aircraft_altitude : inc \aircraft_altitude
+      if \aircraft_altitude < 848 then inc \aircraft_altitude : inc \aircraft_altitude else spr_setshape 7, 194 + \dir! * 27
     else
       \speed! = 0
-      \aircraft_mode! = \AIRCRAFT_MODE_REFUEL!
-      textat 14, 12, " refueling  "
+      if \ufo_count! = 0 then
+        textat 14, 12, "  well done   "
+        \level_done! = 1
+      else
+        \aircraft_mode! = \AIRCRAFT_MODE_REFUEL!
+        textat 14, 12, "  refueling   "
+      endif
     endif
     return
   
@@ -77,6 +87,8 @@ proc actions
     return
   
   draw_fuel:
+    
+    
     offset! = rshift!(\fuel!, 2)
     if offset! = 0 then return
     poke 1065 + offset!, $3b

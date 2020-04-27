@@ -32,6 +32,22 @@ const VIC_BACKGR = $d021
 
 const CIA2_PRA = $dd00
 
+const SID_VOLUME = $d418
+
+const SID_CTRL1 = $d404
+const SID_AD1 = $d405
+const SID_SR1 = $d406
+
+const SID_CTRL2 = $d40b
+const SID_AD2 = $d40c
+const SID_SR2 = $d40d
+const SID_FREQ2 = $d407
+
+const SID_CTRL3 = $d412
+const SID_AD3 = $d413
+const SID_SR3 = $d414
+const SID_FREQ3 = $d40e
+
 const SCROLL_AREA_TOP = 1664
 
 const SCROLL_SHIFT_START = 1665
@@ -46,6 +62,9 @@ const SCREEN = $0400
 const COLOR = $d800
 
 first_run! = 1
+
+dim city_map_ptr_left fast
+dim city_map_ptr_right fast
 
 let city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
 let city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
@@ -86,7 +105,8 @@ dim ufo_wave![13]
 
 dim attack_wave_y![150,13]
 dim attack_wave_x[150,13]
-dim attack_wave_radar_pos[4,13]
+dim attack_wave_radar_pos[10,13]
+dim attack_wave_radar_shape![10,13]
 
 dim spr_to_ufo![3]
 
@@ -94,6 +114,11 @@ let bullet_on! = 0
 let bullet_xpos = 0
 let bullet_ypos! = 0
 let bullet_dy! = 0
+let bullet_speed! = 0
+dim bullet_sound_freq
+dim bullet_sound_step
+dim sound_counter!
+rem -- 0 = left 1 = right 2 = left bomb 3 = right bomb
 let bullet_dir! = 1
 
 const AIRCRAFT_MODE_TAXI! = 0
@@ -104,3 +129,8 @@ const AIRCRAFT_MODE_NOSEDIVING! = 4
 
 aircraft_mode! = AIRCRAFT_MODE_TAXI!
 fuel! = 0
+
+let wave! = 1
+
+dim fleet! : dim ufo_count! : dim ufos_killed : dim level_done!
+dim microspeed!

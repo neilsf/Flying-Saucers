@@ -56,10 +56,21 @@
     if \turning! = 0 then
       \bullet_on! = 1
       \bullet_ypos! = cast!(rshift(\aircraft_altitude, 2))
-      \bullet_xpos = 160
+      \bullet_xpos = 166
       \bullet_dir! = \dir!
+      if joy_1_down!() = 1 then
+        \bullet_speed! = \microspeed!
+        \bullet_sound_step = 75
+      else
+        \bullet_speed! = \microspeed! + 12
+        \bullet_sound_step = 400
+      endif
       \bullet_dy! = lifting_to_bullet_dy![\lifting!]
       spr_enable 6
+      spr_setshape 6, 223 - \dir!
+      \bullet_sound_freq = 12000
+      doke \SID_FREQ2, \bullet_sound_freq
+      poke \SID_CTRL2, %00010001
     endif
   endif
   

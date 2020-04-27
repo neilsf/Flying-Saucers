@@ -2,7 +2,7 @@ proc update_sprites
 
   rem -- move aircraft
   
-  freq = 1500 + lshift(cast(\speed!), 8)
+  freq = 1500 + lshift(cast(\speed!), 3)
   doke $d400, freq 
   ;doke $d407, freq
 
@@ -11,7 +11,7 @@ proc update_sprites
   spr_loc_offset! = spr_loc_offsets![\dir!]
   
   if \turning! = 0 then
-    spr_setshape 7, 168  + \lifting! + spr_loc_offset!
+    if \aircraft_mode! = \AIRCRAFT_MODE_TAXI! then spr_setshape 7, 168  + \lifting! + spr_loc_offset!
   else
     if \turn_phase! = 0 then
       \turn_phase! = 171 + spr_loc_offset!
@@ -36,15 +36,30 @@ rem -- move bullet
 
     spr_setpos 6, \bullet_xpos, \bullet_ypos!
     
+    curr_bullet_dx = bullet_dx[\bullet_dir!]
+    
+    ''\bullet_xpos = \bullet_xpos + dirmult[\dir!] * microspeed!
+    
     if \bullet_dir! = 1 then
-      \bullet_xpos = \bullet_xpos + 12 - rshift!(\speed!, 4)
+      if \dir! = 1 then
+        \bullet_xpos = \bullet_xpos + cast(\bullet_speed!) - cast(\microspeed!)
+      else
+        \bullet_xpos = \bullet_xpos + cast(\bullet_speed!) + cast(\microspeed!)
+      endif
     else
-      \bullet_xpos = \bullet_xpos - 12 + rshift!(\speed!, 4)
+      if \dir! = 0 then
+        \bullet_xpos = \bullet_xpos - cast(\bullet_speed!) + cast(\microspeed!)
+      else
+        \bullet_xpos = \bullet_xpos - cast(\bullet_speed!) - cast(\microspeed!)
+      endif
     endif
    
     \bullet_ypos! = \bullet_ypos! + \bullet_dy!
+    \bullet_sound_freq = \bullet_sound_freq - \bullet_sound_step
+    doke \SID_FREQ2, \bullet_sound_freq
    
-    if \bullet_xpos < 20 or \bullet_xpos > 340 then \bullet_on! = 0 : spr_disable 6
+    if \bullet_xpos < 20 or \bullet_xpos > 340 then \bullet_on! = 0 : spr_disable 6 : poke \SID_CTRL2, %00010000
+    if \bullet_ypos! > 230 then \bullet_on! = 0 : spr_disable 6 : poke \SID_CTRL2, %00010000
   endif
 
   rem -- move ufos
@@ -78,6 +93,7 @@ rem -- move bullet
           \ufo_on![zone!] = 0
           \ufo_hit![zone!] = 0
           spr_disable i!
+          dec \ufo_count! : inc \ufos_killed : call update_scoretable
         endif
       endif
       
@@ -93,4 +109,5 @@ rem -- move bullet
   data switchdir![] = 1, 0
   data ufo_anim![] = 160, 161, 162, 161
   data zones_shifted![] = 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
+  data bullet_dx[] = 12, 12, 0, 0
 endproc

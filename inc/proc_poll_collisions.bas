@@ -1,8 +1,11 @@
 proc poll_collisions
 
+  if \sound_counter! < 2 then poke \SID_CTRL3, %10000000
+
   if spr_data_collision!(7) = 1 then
     if \aircraft_xpos < 4512 or \aircraft_xpos > 4768 then
-      ''\aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
+      dec \fleet!
+      \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
       return
     endif
   endif
@@ -16,6 +19,9 @@ proc poll_collisions
         \ufo_hit![ufo_num!] = 1
         \ufo_animphase![ufo_num!] = 163
         \bullet_on! = 0
+        poke \SID_CTRL2, %00010000
+        poke \SID_CTRL3, %10000001
+        \sound_counter! = 25
         spr_disable 6
       endif
     next i!
