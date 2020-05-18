@@ -27,6 +27,17 @@ proc actions
         endif
       endif
     endif
+    rem -- check if time for an ufo to come
+    if \ufo_timer <= 0 then
+      \ufo_on![\nxt_attack_wave_pos!] = 1
+      \ufo_hit![\nxt_attack_wave_pos!] = 0
+      \ufo_path![\nxt_attack_wave_pos!] = 0
+      rem get next ufo
+      \ufo_timer = \attack_wave_1[\attack_wave_index]
+      inc \attack_wave_index
+      \nxt_attack_wave_pos! = cast!(\attack_wave_1[\attack_wave_index])
+      inc \attack_wave_index
+    endif
     return
     
   start_landing:
@@ -59,8 +70,10 @@ proc actions
       \lifting! = 1
       dec \aircraft_altitude : dec \aircraft_altitude
     endif
-    if anim_counter! = 70 then
+    if anim_counter! >= 70 then
       memset $05ed, 14, 32
+      rem -- clear collision registers
+      x! = peek!(\SPR_DATA_COLL)
       \aircraft_mode! = \AIRCRAFT_MODE_TAXI!
     endif
     return
@@ -83,7 +96,21 @@ proc actions
     return
   
   nosediving:
-    \aircraft_altitude = \aircraft_altitude - 4
+    if \frame_count! & %00000011 = 1 then
+      spr_setshape 7, \turn_phase!
+      inc \turn_phase! : inc \turn_phase_count!
+      if \turn_phase_count! = 6 then
+        spr_disable 7
+        \speed! = 0
+        \level_done! = 2
+        if \fleet! > 1 then
+          textat 12, 12, "    crashed    "
+        else
+          textat 12, 12, "   game over   "
+        endif
+      endif
+    endif
+    \aircraft_altitude = \aircraft_altitude + 4
     return
   
   draw_fuel:

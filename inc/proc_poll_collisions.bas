@@ -1,13 +1,16 @@
 proc poll_collisions
 
+  if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
+
   if \sound_counter! < 2 then poke \SID_CTRL3, %10000000
 
-  if spr_data_collision!(7) = 1 then
-    if \aircraft_xpos < 4512 or \aircraft_xpos > 4768 then
-      dec \fleet!
-      \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
-      return
-    endif
+  aircraft_coll_state! = peek!(\SPR_DATA_COLL)
+  
+  if aircraft_coll_state! & %10000000 = %10000000 then
+    \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
+    \turn_phase! = 242 + \dir! * 8
+    \turn_phase_count! = 0
+    return
   endif
 
   rem -- check if bullet hit a ufo

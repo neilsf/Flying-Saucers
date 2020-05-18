@@ -134,3 +134,14 @@ let wave! = 1
 
 dim fleet! : dim ufo_count! : dim ufos_killed : dim level_done!
 dim microspeed!
+
+dim attack_wave_index
+dim ufo_timer
+dim nxt_attack_wave_pos!
+; ufo count per attack wave
+; [timing, attack_wave_position (0-12)]*
+
+data attack_wave_1[] = 2,   150, 3,   250, 6
+data attack_wave_2[] = 3,   150, 3,   250, 6,   250, 4
+
+  

@@ -19,7 +19,6 @@ include "ext/xcb-ext-joystick.bas"
 include "ext/xcb-ext-rasterinterrupt.bas"
 include "inc/globals.bas"
 include "inc/proc_configure_sprites.bas"
-include "inc/proc_logo.bas"
 
 gosub instructions
 goto main
@@ -31,9 +30,10 @@ include "inc/proc_query_joystick.bas"
 include "inc/proc_poll_collisions.bas"
 include "inc/proc_setup_screen.bas"
 include "inc/proc_update_radar.bas"
-include "inc/proc_intro.bas"
 include "inc/proc_actions.bas"
 include "inc/proc_move_ufos.bas"
+include "inc/proc_logo.bas"
+include "inc/proc_intro.bas"
 
 main:
 
@@ -42,18 +42,6 @@ poke VIC_MEMSETUP, %00011000
 poke VIC_BORDER, 0 : poke VIC_BACKGR, 0
 
 call intro
-
-poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) & %11101111
-
-call configure_sprites
-spr_enable 7
-let city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
-let city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
-
-rem -- play starts here
-
-call setup_screen(1)
-;call configure_sprites
 
 for addr = $d400 to $d418
   poke addr, 0
@@ -121,116 +109,126 @@ ri_set_isr 0, @interrupt1, 50
 ri_set_isr 1, @interrupt2, 90
 ri_set_isr 2, @interrupt3, 176
 ri_syshandler_off
-ri_on
 
 rem -----------------------------------------------
 rem -- START NEW GAME
 rem -----------------------------------------------
 
-fleet! = 4 : wave! = 1 : ufo_count! = 3 : ufos_killed = 0
+ri_off
+  
+poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) & %11101111
 
+call configure_sprites
+
+ri_on
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
-game_loop:
+rem -- 0: not done 1: done 2: life lost
+level_done! = 1
+fleet! = 4 : wave! = 1 : ufo_count! = 3 : ufos_killed = 0
+attack_wave_index = 0
 
+game_loop:
+  spr_enable 7
+  let city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
+  let city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
+  call setup_screen(1)
+  if level_done! = 1 then
+    memset $d9ed, 15, 2
+    textat 14, 12, "attack wave" : textat 25, 12, wave! 
+    
+    for j! = 0 to 12
+      ufo_on![j!] = 0
+      ufo_hit![j!] = 0
+    next j!
+    
+    ufo_count! = cast!(attack_wave_1[attack_wave_index])
+    inc attack_wave_index
+    ufo_timer = attack_wave_1[attack_wave_index]
+    inc attack_wave_index
+    nxt_attack_wave_pos! = cast!(attack_wave_1[attack_wave_index])
+    inc attack_wave_index
+  endif
+  
   level_done! = 0
   fuel! = 0
-  speed! = 0
-  autopilot! = 1
+  speed! = 0 : dir! = 1
   aircraft_mode! = AIRCRAFT_MODE_REFUEL!
+  
   call update_scoretable
-  memset $d9ed, 15, 2
-  textat 14, 12, "attack wave" : textat 25, 12, wave! 
   
-  for j! = 0 to 12
-    ufo_on![j!] = 0
-    ufo_hit![j!] = 0
-  next j!
-  
-  rem TEST UFOS
-  ufo_on![2] = 1 : ufo_path![2] = 0
-  ufo_on![3] = 1 : ufo_path![3] = 0
-  ufo_on![4] = 1 : ufo_path![4] = 0
+  level_loop:
 
-  main_loop:
-    
-    watch RASTER_POS, 150
+    main_loop:
       
-    ;poke 53280, 2
-    
-    call query_joystick
-    call update_sprites
-    
-    microspeed! = rshift!(speed!, 4)
+      watch RASTER_POS, 150
+        
+      ;poke 53280, 2
+      
+      call query_joystick
+      call update_sprites
+      
+      microspeed! = rshift!(speed!, 4)
 
-    rem --
-    rem -- scroll the stage to left or right
-    rem --
-    
-    if dir! = 0 then
-      scroll! = scroll! + microspeed!
-      aircraft_xpos = aircraft_xpos - microspeed!
-      if aircraft_xpos < 0 then aircraft_xpos = aircraft_xpos + 5120
-      if scroll! > 7 then
-        scroll! = scroll! & %00000111
-        call shift_right
+      rem --
+      rem -- scroll the stage to left or right
+      rem --
+      
+      if dir! = 0 then
+        scroll! = scroll! + microspeed!
+        aircraft_xpos = aircraft_xpos - microspeed!
+        if aircraft_xpos < 0 then aircraft_xpos = aircraft_xpos + 5120
+        if scroll! > 7 then
+          scroll! = scroll! & %00000111
+          call shift_right
+        else
+          call poll_collisions
+          call move_ufos
+          call update_radar
+        endif
       else
-        call poll_collisions
-        call move_ufos
-        call update_radar
+        scroll! = scroll! - microspeed!
+        aircraft_xpos = aircraft_xpos + microspeed!
+        if aircraft_xpos > 5119 then aircraft_xpos = aircraft_xpos - 5120
+        if scroll! > 249 then
+          scroll! = scroll! & %00000111
+          call shift_left
+        else
+          call poll_collisions
+          call move_ufos
+          call update_radar
+        endif
       endif
-    else
-      scroll! = scroll! - microspeed!
-      aircraft_xpos = aircraft_xpos + microspeed!
-      if aircraft_xpos > 5119 then aircraft_xpos = aircraft_xpos - 5120
-      if scroll! > 249 then
-        scroll! = scroll! & %00000111
-        call shift_left
-      else
-        call poll_collisions
-        call move_ufos
-        call update_radar
-      endif
-    endif
+      
+      dec frame_count!
+      dec sound_counter!
+      dec ufo_timer
+      call actions
+      
+      on level_done! goto main_loop, level_done, life_lost
+      
+      level_done:
+        inc wave!
+        inc fleet!
+        for j! = 0 to 200
+          watch \RASTER_POS, 0
+        next j!
+        goto game_loop
+        
+      life_lost:
+        dec fleet!
+        fuel! = 0
+        aircraft_altitude = 848
+        aircraft_xpos = 4640
+        for ii = 0 to 400
+          watch \RASTER_POS, 0
+        next ii
+        if fleet! = 0 then goto game_over else goto game_loop
     
-    
-    dec frame_count!
-    dec sound_counter!
-    call actions
-    
-    if level_done! = 1 then goto level_done else poke 53280, 0 : goto main_loop
-  
-  level_done:
-    inc wave!
-    inc fleet!
-    for j! = 0 to 200
-      watch \RASTER_POS, 0
-    next j!
-  
-goto game_loop
+    goto game_loop
   
 game_over:
-
-  
-asm "
-  ECHO *
-"
-  
-rem -- graphics data
-origin $1ffe
-
-rem -- chars ($2000-2800)
-incbin "resources/charset.64c"
-
-rem -- sprites ($2800-$3c7a)
-incbin "resources/sprites.bin"
-
-rem -- map ($4000-)
-origin $4000
-incbin "resources/graphics.bin"
-
-origin $5440
-incbin "resources/Black_Hawk5400_cut_headless.sid"
+  goto main
 
 instructions:
   poke VIC_CONTROL2, %11001000
@@ -259,7 +257,7 @@ instructions:
   
   gosub wait_key
   
-  print "{13} Controls"
+  print "{147}{13} Controls"
   print " --------{13}"
   
   print " Use joystick in port 1. The take-off"
@@ -274,16 +272,16 @@ instructions:
   print " * Do not hit into any objects."
   print " * Return to the carrier when you're"
   print "   low on fuel.{13}"
+
+  print " The game ends when"
+  print " * A UFO reaches ground - or -"
+  print " * You lose all your fleet{13}"
   
   print " press a key to continue..."
 
   gosub wait_key
   
-  print "  {13} The game ends when"
-  print " * A UFO reaches ground - or -"
-  print " * You lose all your fleet{13}"
-  
-  print " Landing"
+  print "{147} Landing"
   print " -------{13}"
   
   print " Approach the aircraft carrier with low"
@@ -297,4 +295,21 @@ instructions:
   wait_key:
     if inkey!() = 0 then goto wait_key
     return
-  
+    
+rem -- graphics data
+origin $1ffe
+
+rem -- chars ($2000-2800)
+incbin "resources/charset.64c"
+
+rem -- sprites ($2800-$3c7a)
+incbin "resources/sprites.bin"
+
+rem -- map ($4000-)
+origin $4000
+incbin "resources/graphics.bin"
+
+origin $5440
+incbin "resources/Black_Hawk5400_cut_headless.sid"
+rem -- $6400-
+incbin "resources/logo.bin"
