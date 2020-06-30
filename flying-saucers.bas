@@ -17,6 +17,7 @@ endproc
 include "ext/xcb-ext-sprite.bas"
 include "ext/xcb-ext-joystick.bas"
 include "ext/xcb-ext-rasterinterrupt.bas"
+include "inc/constants.bas"
 include "inc/globals.bas"
 include "inc/proc_configure_sprites.bas"
 
