@@ -16,11 +16,10 @@ proc poll_collisions
   rem -- check if bullet hit a ufo
   spr_hit! = peek!(\SPR_SPR_COLL)
   if spr_hit! & %01000000 > 0 then
-    for i! = 0 to 2
+    for i! = 0 to 3
       if spr_hit! & %00111111 = bits![i!] then
-        ufo_num! = \spr_to_ufo![i!]
-        \ufo_hit![ufo_num!] = 1
-        \ufo_animphase![ufo_num!] = 163
+        \ufo_hit![i!] = 1
+        \ufo_animphase![i!] = 163
         \bullet_on! = 0
         poke \SID_CTRL2, %00010000
         poke \SID_CTRL3, %10000001

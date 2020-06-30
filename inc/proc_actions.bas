@@ -1,7 +1,7 @@
 rem -----------------------
 rem -- routines that handle
 rem -- take off, landing, 
-rem -- refueling
+rem -- refueling, etc
 rem -----------------------
 
 proc actions
@@ -28,16 +28,7 @@ proc actions
       endif
     endif
     rem -- check if time for an ufo to come
-    if \ufo_timer <= 0 then
-      \ufo_on![\nxt_attack_wave_pos!] = 1
-      \ufo_hit![\nxt_attack_wave_pos!] = 0
-      \ufo_path![\nxt_attack_wave_pos!] = 0
-      rem get next ufo
-      \ufo_timer = \attack_wave_1[\attack_wave_index]
-      inc \attack_wave_index
-      \nxt_attack_wave_pos! = cast!(\attack_wave_1[\attack_wave_index])
-      inc \attack_wave_index
-    endif
+    rem -- TODO implement
     return
     
   start_landing:
@@ -114,8 +105,6 @@ proc actions
     return
   
   draw_fuel:
-    
-    
     offset! = rshift!(\fuel!, 2)
     if offset! = 0 then return
     poke 1065 + offset!, $3b

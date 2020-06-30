@@ -1,3 +1,9 @@
+rem ----------------------
+rem - enable, disable,
+rem - move and animate
+rem - sprites
+rem ----------------------
+
 proc update_sprites
 
   rem -- move aircraft
@@ -65,49 +71,52 @@ rem -- move bullet
   rem -- move ufos
   
   if \frame_count! & %00001111 = 0 then
-    for i! = 0 to 12
+    for i! = 0 to 3
       if \ufo_on![i!] = 1 then
-        inc \ufo_path![i!]
+        rem TODO implement
+        rem inc \ufo_path![i!]
       endif
     next i!
   endif
   
   rem -- display ufos
   
-  tmp! = \aircraft_xpos / 320
-  zone! = zones_shifted![tmp!]
-  for i! = 0 to 2
-    x  = \attack_wave_x[\ufo_path![zone!], zone!] - \aircraft_xpos
-    if \ufo_on![zone!] = 1 and abs(x) <= 160 then
-      spr_enable i!
-      \spr_to_ufo![i!] = zone!
-      y! = \attack_wave_y![\ufo_path![zone!], zone!] 
-      spr_setpos i!, x + 173, y!
-      spr_setshape i!, ufo_anim![rshift!(\frame_count! & %00110000, 4)]
+  for i! = 0 to 3
+    if \ufo_on![i!] = 1 then
+      x = \ufo_xpos[i!] - \aircraft_xpos
+      if abs(x) <= 160 then
       
-     rem -- ufo fade animation
-      if \ufo_hit![zone!] = 1 and \frame_count! & %00000011 = 1 then
-        spr_setshape i!, \ufo_animphase![zone!]
-        inc \ufo_animphase![zone!]
-        if \ufo_animphase![zone!] = 167 then
-          \ufo_on![zone!] = 0
-          \ufo_hit![zone!] = 0
-          spr_disable i!
-          dec \ufo_count! : inc \ufos_killed : call update_scoretable
+        spr_setpos i!, x + 173, \ufo_altitude![i!]
+        spr_enable i!
+        
+        rem -- display fade animation if ufo is shot
+        if \ufo_hit![i!] = 1 and \frame_count! & %00000011 = 1 then
+          spr_setshape i!, \ufo_animphase![i!]
+          inc \ufo_animphase![i!]
+          rem -- if animation is over
+          if \ufo_animphase![i!] = 167 then
+            \ufo_on![i!] = 0
+            \ufo_hit![i!] = 0
+            spr_disable i!
+            dec \ufo_count! : inc \ufos_killed : call update_scoretable
+          endif
+        else
+          rem -- display normal animation if not
+          spr_setshape i!, ufo_anim![rshift!(\frame_count! & %00110000, 4)]
         endif
+        
+      else
+        spr_disable i!
       endif
-      
     else
       spr_disable i!
     endif
-    inc zone!
-  next i!
+  next
   
   data spr_loc_offsets![] = 0, 27
 
   data turn_speed![] = 48, 46, 44, 42, 40, 38, 36, 34, 32, 32, 32, 32, 34, 36, 38, 40, 42, 44, 46, 48, 48
   data switchdir![] = 1, 0
   data ufo_anim![] = 160, 161, 162, 161
-  data zones_shifted![] = 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
   data bullet_dx[] = 12, 12, 0, 0
 endproc

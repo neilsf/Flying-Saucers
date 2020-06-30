@@ -1,7 +1,9 @@
+rem --------------------------------------
 rem -- Screen shifting routines
 rem --
 rem -- These routines shift the
 rem -- screen left or right by one column
+rem --------------------------------------
 
 proc shift_left
     

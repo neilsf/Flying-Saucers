@@ -1,3 +1,9 @@
+rem ----------------------
+rem - query joystick state
+rem - and update variables
+rem - accordingly
+rem ----------------------
+
  proc query_joystick
 
   if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
@@ -16,8 +22,7 @@
     endif
   endif
 
-  
-  rem -- TODO: RESOLVE THIS IF NIGHTMARE
+  rem -- TODO: RESOLVE THIS IF..ELSE NIGHTMARE
   
   if joy_1_right!() = 1 then joy_dir! = 1 
 
@@ -51,7 +56,6 @@
     endif
   endif
   
-
   if joy_1_fire!() = 1 and \bullet_on! = 0 then
     if \turning! = 0 then
       \bullet_on! = 1

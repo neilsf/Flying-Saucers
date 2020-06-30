@@ -138,17 +138,10 @@ game_loop:
     memset $d9ed, 15, 2
     textat 14, 12, "attack wave" : textat 25, 12, wave! 
     
-    for j! = 0 to 12
+    for j! = 0 to 3
       ufo_on![j!] = 0
       ufo_hit![j!] = 0
     next j!
-    
-    ufo_count! = cast!(attack_wave_1[attack_wave_index])
-    inc attack_wave_index
-    ufo_timer = attack_wave_1[attack_wave_index]
-    inc attack_wave_index
-    nxt_attack_wave_pos! = cast!(attack_wave_1[attack_wave_index])
-    inc attack_wave_index
   endif
   
   level_done! = 0
@@ -203,7 +196,6 @@ game_loop:
       
       dec frame_count!
       dec sound_counter!
-      dec ufo_timer
       call actions
       
       on level_done! goto main_loop, level_done, life_lost

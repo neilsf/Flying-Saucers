@@ -28,26 +28,18 @@ let lifting! = 0
 
 let turn_phase! = 0
 let turn_phase_count! = 0
+
 rem -- always divided by 4 to get sprite y pos
 let aircraft_altitude = 848
 let aircraft_xpos = 2560
 let aircraft_zone! = 14
-'let aircraft_relxpos = 160
+
 rem -- these are actual sprite y positions
-dim ufo_altitude![13]
-dim ufo_xpos[13]
-dim ufo_on![13]
-dim ufo_hit![13]
-dim ufo_animphase![13]
-dim ufo_path![13]
-dim ufo_wave![13]
-
-dim attack_wave_y![150,13]
-dim attack_wave_x[150,13]
-dim attack_wave_radar_pos[10,13]
-dim attack_wave_radar_shape![10,13]
-
-dim spr_to_ufo![3]
+dim ufo_altitude![4]
+dim ufo_xpos[4]
+dim ufo_on![4]
+dim ufo_hit![4]
+dim ufo_animphase![4]
 
 let bullet_on! = 0
 let bullet_xpos = 0
@@ -67,12 +59,3 @@ let wave! = 1
 
 dim fleet! : dim ufo_count! : dim ufos_killed : dim level_done!
 dim microspeed!
-
-dim attack_wave_index
-dim ufo_timer
-dim nxt_attack_wave_pos!
-; ufo count per attack wave
-; [timing, attack_wave_position (0-12)]*
-
-data attack_wave_1[] = 2,   150, 3,   250, 6
-data attack_wave_2[] = 3,   150, 3,   250, 6,   250, 4
