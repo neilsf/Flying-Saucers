@@ -12,8 +12,8 @@ proc actions
   on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving
   
   taxi:
-    rem -- decrease fuel
     if \frame_count! & %01111111 = 0 then
+      rem -- decrease fuel
       dec \fuel!
       gosub erase_fuel
     endif
@@ -27,8 +27,7 @@ proc actions
         endif
       endif
     endif
-    rem -- check if time for an ufo to come
-    rem -- TODO implement
+    
     return
     
   start_landing:
@@ -95,6 +94,7 @@ proc actions
         \speed! = 0
         \level_done! = 2
         if \fleet! > 1 then
+          sfx_start 1
           textat 12, 12, "    crashed    "
         else
           textat 12, 12, "   game over   "

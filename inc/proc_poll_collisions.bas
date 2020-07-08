@@ -2,8 +2,6 @@ proc poll_collisions
 
   if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
 
-  if \sound_counter! < 2 then poke \SID_CTRL3, %10000000
-
   aircraft_coll_state! = peek!(\SPR_DATA_COLL)
   
   if aircraft_coll_state! & %10000000 = %10000000 then
@@ -21,10 +19,8 @@ proc poll_collisions
         \ufo_hit![i!] = 1
         \ufo_animphase![i!] = 163
         \bullet_on! = 0
-        poke \SID_CTRL2, %00010000
-        poke \SID_CTRL3, %10000001
-        \sound_counter! = 25
         spr_disable 6
+        sfx_start 9
       endif
     next i!
   endif

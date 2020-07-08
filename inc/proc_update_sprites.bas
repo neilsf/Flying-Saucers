@@ -9,9 +9,8 @@ proc update_sprites
   rem -- move aircraft
   
   freq = 1500 + lshift(cast(\speed!), 3)
-  doke $d400, freq 
-  ;doke $d407, freq
-
+  doke $d40e, freq 
+  
   spr_setposy 7, cast!(rshift(\aircraft_altitude, 2))
 
   spr_loc_offset! = spr_loc_offsets![\dir!]
@@ -61,24 +60,11 @@ rem -- move bullet
     endif
    
     \bullet_ypos! = \bullet_ypos! + \bullet_dy!
-    \bullet_sound_freq = \bullet_sound_freq - \bullet_sound_step
-    doke \SID_FREQ2, \bullet_sound_freq
    
-    if \bullet_xpos < 20 or \bullet_xpos > 340 then \bullet_on! = 0 : spr_disable 6 : poke \SID_CTRL2, %00010000
-    if \bullet_ypos! > 230 then \bullet_on! = 0 : spr_disable 6 : poke \SID_CTRL2, %00010000
+    if \bullet_xpos < 20 or \bullet_xpos > 340 then \bullet_on! = 0 : spr_disable 6
+    if \bullet_ypos! > 230 then \bullet_on! = 0 : spr_disable 6
   endif
 
-  rem -- move ufos
-  
-  if \frame_count! & %00001111 = 0 then
-    for i! = 0 to 3
-      if \ufo_on![i!] = 1 then
-        rem TODO implement
-        rem inc \ufo_path![i!]
-      endif
-    next i!
-  endif
-  
   rem -- display ufos
   
   for i! = 0 to 3
@@ -89,6 +75,8 @@ rem -- move bullet
         spr_setpos i!, x + 173, \ufo_altitude![i!]
         spr_enable i!
         
+        testlabel:
+        
         rem -- display fade animation if ufo is shot
         if \ufo_hit![i!] = 1 and \frame_count! & %00000011 = 1 then
           spr_setshape i!, \ufo_animphase![i!]
@@ -98,7 +86,7 @@ rem -- move bullet
             \ufo_on![i!] = 0
             \ufo_hit![i!] = 0
             spr_disable i!
-            dec \ufo_count! : inc \ufos_killed : call update_scoretable
+            dec \ufo_count! : inc \ufos_killed : dec \no_of_ufos_in_this_wave! : call update_scoretable
           endif
         else
           rem -- display normal animation if not

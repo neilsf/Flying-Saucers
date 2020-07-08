@@ -56,7 +56,7 @@ proc logo
   sys $5443
   ri_on
   
-  for i = 0 to 200
+  for i = 0 to 2 : rem 200
     watch \RASTER_POS, 0
   next i
   
@@ -70,7 +70,7 @@ proc logo
   textat 14, 10, "their first"
   textat 16, 12, "release"
   
-  for i = 0 to 530
+  for i = 0 to 2 : rem 530
     watch \RASTER_POS, 0
   next i
   

@@ -72,9 +72,7 @@ rem ----------------------
       \bullet_dy! = lifting_to_bullet_dy![\lifting!]
       spr_enable 6
       spr_setshape 6, 223 - \dir!
-      \bullet_sound_freq = 12000
-      doke \SID_FREQ2, \bullet_sound_freq
-      poke \SID_CTRL2, %00010001
+      sfx_start 13
     endif
   endif
   

@@ -17,6 +17,7 @@ endproc
 include "ext/xcb-ext-sprite.bas"
 include "ext/xcb-ext-joystick.bas"
 include "ext/xcb-ext-rasterinterrupt.bas"
+include "ext/xcb-ext-sfx.bas"
 include "inc/constants.bas"
 include "inc/globals.bas"
 include "inc/proc_configure_sprites.bas"
@@ -48,31 +49,22 @@ for addr = $d400 to $d418
   poke addr, 0
 next addr
 
+sfx_init @sounds + 2, 1
+
 rem filter mode and main volume control
 rem vol=15, filter=low pass
 poke SID_VOLUME, %00011111
 
 rem ** AIRPLANE WHITE NOISE **
-rem control register voice 1
-poke SID_CTRL1, %10000001
+rem control register voice 3
+poke SID_CTRL3, %10000001
 
-poke SID_AD1, %00100000
-poke SID_SR1, %11110000
+poke SID_AD3, %00100000
+poke SID_SR3, %11110000
 ; filters
 poke $d415, 0
 poke $d416, %00011100
-poke $d417, %01000001
-
-rem ** REFUELING / SHOOTING SOUND **
-poke SID_CTRL2, %00010000
-poke SID_AD2, %00010010 
-poke SID_SR2, %11000010
-
-rem ** EXPLOSIONS **
-poke SID_CTRL3, %10000000
-poke SID_AD3, %00010010 
-poke SID_SR3, %11001010
-doke SID_FREQ3, 260
+poke $d417, %01000100
 
 rem --------------------------------------------
 rem -- Set graphics properties on top of screen 
@@ -125,12 +117,13 @@ ri_on
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
 rem -- 0: not done 1: done 2: life lost
-level_done! = 1
-fleet! = 4 : wave! = 1 : ufo_count! = 3 : ufos_killed = 0
+level_done! = 1 : wave! = 1
+fleet! = 4 : wave_countdown! = 7 : ufos_killed = 0
 attack_wave_index = 0
 
 game_loop:
   spr_enable 7
+  let aircraft_xpos = 2560
   let city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
   let city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
   call setup_screen(1)
@@ -149,18 +142,26 @@ game_loop:
   speed! = 0 : dir! = 1
   aircraft_mode! = AIRCRAFT_MODE_REFUEL!
   
+  no_of_waves! = \levels![attack_wave_index]
+  inc attack_wave_index
+  
+  ufo_count! = \levels![attack_wave_index]
+  inc attack_wave_index
+  
   call update_scoretable
   
   level_loop:
 
     main_loop:
       
-      watch RASTER_POS, 150
+      watch RASTER_POS, 230
         
-      ;poke 53280, 2
+      poke 53280, 2
       
       call query_joystick
       call update_sprites
+      
+      poke 53280, 1
       
       microspeed! = rshift!(speed!, 4)
 
@@ -177,7 +178,6 @@ game_loop:
           call shift_right
         else
           call poll_collisions
-          call move_ufos
           call update_radar
         endif
       else
@@ -189,14 +189,20 @@ game_loop:
           call shift_left
         else
           call poll_collisions
-          call move_ufos
           call update_radar
         endif
       endif
       
+      poke 53280, 4
+      
       dec frame_count!
       dec sound_counter!
+      
       call actions
+      call move_ufos
+      call sfx_play
+      
+      poke 53280, 0
       
       on level_done! goto main_loop, level_done, life_lost
       
@@ -212,7 +218,7 @@ game_loop:
         dec fleet!
         fuel! = 0
         aircraft_altitude = 848
-        aircraft_xpos = 4640
+        let aircraft_xpos = 2560
         for ii = 0 to 400
           watch \RASTER_POS, 0
         next ii
@@ -306,3 +312,6 @@ origin $5440
 incbin "resources/Black_Hawk5400_cut_headless.sid"
 rem -- $6400-
 incbin "resources/logo.bin"
+
+sounds:
+incbin "resources/sfx.bin"

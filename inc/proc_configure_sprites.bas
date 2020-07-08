@@ -17,7 +17,7 @@ proc configure_sprites
 
   ; ufos
 
-  for i! = 0 to 2
+  for i! = 0 to 3
     spr_setmulti i!
     spr_setcolor i!, 2
     spr_setshape i!, 160
