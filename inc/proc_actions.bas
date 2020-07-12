@@ -21,9 +21,9 @@ proc actions
     if \aircraft_altitude >= 780 and \aircraft_altitude <= 848 then
       if \speed! < 72 then
         if \dir! = 1 then
-          if \aircraft_xpos >= 4448 and \aircraft_xpos <= 4512 then goto start_landing
+          if \aircraft_xpos >= 2368 and \aircraft_xpos <= 2432 then goto start_landing
         else
-          if \aircraft_xpos >= 4768 and \aircraft_xpos <= 4832 then goto start_landing
+          if \aircraft_xpos >= 2688 and \aircraft_xpos <= 2752 then goto start_landing
         endif
       endif
     endif
@@ -69,7 +69,7 @@ proc actions
     return
     
   landing:
-    if abs(\aircraft_xpos - 4640) > 8 then
+    if abs(\aircraft_xpos - 2560) > 8 then
       spr_setshape 7, 193 + \dir! * 27
       if \speed! > 48 then dec \speed!
       if \aircraft_altitude < 848 then inc \aircraft_altitude : inc \aircraft_altitude else spr_setshape 7, 194 + \dir! * 27
@@ -107,15 +107,11 @@ proc actions
   draw_fuel:
     offset! = rshift!(\fuel!, 2)
     if offset! = 0 then return
-    poke 1065 + offset!, $3b
-    poke 1105 + offset!, $a0
-    poke 1145 + offset!, $3c
+    poke 1065 + offset!, $a0
     return
     
   erase_fuel:
     offset! = rshift!(\fuel!, 2)
     poke 1066 + offset!, $20
-    poke 1106 + offset!, $20
-    poke 1146 + offset!, $20
     return
 endproc

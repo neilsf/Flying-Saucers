@@ -38,7 +38,7 @@ proc configure_sprites
   spr_setshape 5, 228
   spr_setdblheight 5
   spr_setposx 5, 176
-  spr_setposy 5, 54
+  spr_setposy 5, 58
   spr_enable 5
   
   

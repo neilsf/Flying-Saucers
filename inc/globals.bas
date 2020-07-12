@@ -12,6 +12,7 @@ let speed! = 1
 let dir! = 1
 let frame_count! = 0
 let scroll! = 0
+let score = 0
 
 rem -- aircraft status
 rem -- 0: flying
@@ -45,7 +46,14 @@ rem -- predefined attack waves: 8 patterns x 8 speed changes
 dim ufo_attack_wave_xspeed[8,8]
 dim ufo_attack_wave_yspeed![8,8]
 rem -- ufos appear at this x positions
-data initial_ufo_posx[] = 192, 650, 900, 1200, 2000, 2300, 3000, 3500
+data initial_ufo_posx[] = 160, 480, 800, 1120, 1440, 1760, 2080, 2400, 2720, 3040, 3360, 3680, 4000, 4320, 4640, 4960
+
+
+data ufo_radar_posx[] = 128, 128, 124, 124, 127, 128, 125, 124, ~
+                        136, 136, 132, 132, 135, 136, 133, 132
+
+data ufo_radar_posy![]= 76, 72, 71, 67, 67, 62, 62, 58, ~
+                        76, 72, 71, 67, 67, 62, 62, 58
 
 let wave_countdown! = 8
 
@@ -61,7 +69,7 @@ rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
 rem -- pattern for each ufos (255: no ufo)
-data levels![] = 3, 5,   255, 255, 0, 1,    255, 255, 2, 3 ,   255, 255, 255, 5
+data levels![] = 3, 3,   255, 255, 255, 0,    255, 255, 255, 3 ,   255, 255, 255, 5
 
 rem -- pointer to the elements of the above array
 dim attack_wave_index

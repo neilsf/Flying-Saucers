@@ -63,11 +63,13 @@ poke SID_AD3, %00100000
 poke SID_SR3, %11110000
 ; filters
 poke $d415, 0
-poke $d416, %00011100
+poke $d416, %00000111
 poke $d417, %01000100
+poke $d418, %00011111
 
 rem --------------------------------------------
 rem -- Set graphics properties on top of screen 
+rem -- and update radar
 rem --------------------------------------------
 
 proc interrupt1
@@ -76,7 +78,7 @@ endproc
 
 rem ----------------------------------------------
 rem -- Set graphics properties after the dashboard 
-rem -- is drawn 
+rem -- is drawn + update main sprites
 rem ----------------------------------------------
 
 proc interrupt2
@@ -114,12 +116,13 @@ poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) & %11101111
 call configure_sprites
 
 ri_on
+
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
 rem -- 0: not done 1: done 2: life lost
 level_done! = 1 : wave! = 1
 fleet! = 4 : wave_countdown! = 7 : ufos_killed = 0
-attack_wave_index = 0
+attack_wave_index = 0 : no_of_ufos_in_this_wave! = 0
 
 game_loop:
   spr_enable 7
@@ -155,13 +158,9 @@ game_loop:
     main_loop:
       
       watch RASTER_POS, 230
-        
-      poke 53280, 2
-      
+
       call query_joystick
-      call update_sprites
-      
-      poke 53280, 1
+      call update_radar
       
       microspeed! = rshift!(speed!, 4)
 
@@ -178,7 +177,6 @@ game_loop:
           call shift_right
         else
           call poll_collisions
-          call update_radar
         endif
       else
         scroll! = scroll! - microspeed!
@@ -188,8 +186,7 @@ game_loop:
           scroll! = scroll! & %00000111
           call shift_left
         else
-          call poll_collisions
-          call update_radar
+          call poll_collisions          
         endif
       endif
       
@@ -200,9 +197,14 @@ game_loop:
       
       call actions
       call move_ufos
-      call sfx_play
+      poke 53280, 2
+      call update_sprites
       
       poke 53280, 0
+      
+      call sfx_play
+      
+      
       
       on level_done! goto main_loop, level_done, life_lost
       
