@@ -9,7 +9,7 @@ proc actions
   dim anim_counter!
   dim altitude_delta
   
-  on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving
+  on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving, scrolling_to_ufo
   
   taxi:
     if \frame_count! & %01111111 = 0 then
@@ -38,10 +38,11 @@ proc actions
     
   refuel:
     spr_setshape 7, 194 + \dir! * 27
+    spr_enable 7
     if \frame_count! & %00000111 = 0 then
       inc \fuel!
       gosub draw_fuel
-      if \fuel! >= 32 then
+      if \fuel! >= 36 then
         ''poke \SID_CTRL2, %00100000
         \speed! = 48
         anim_counter! = 0
@@ -64,6 +65,7 @@ proc actions
       memset $05ed, 14, 32
       rem -- clear collision registers
       x! = peek!(\SPR_DATA_COLL)
+      x! = peek!(\SPR_SPR_COLL)
       \aircraft_mode! = \AIRCRAFT_MODE_TAXI!
     endif
     return
@@ -74,8 +76,10 @@ proc actions
       if \speed! > 48 then dec \speed!
       if \aircraft_altitude < 848 then inc \aircraft_altitude : inc \aircraft_altitude else spr_setshape 7, 194 + \dir! * 27
     else
-      \speed! = 0
+      \speed! = 0 : \score = \score + 2
       if \ufo_count! = 0 then
+        \score = \score + 5
+        if \fleet_at_start! = \fleet! then \score = \score + 5
         textat 14, 12, "  well done   "
         \level_done! = 1
       else
@@ -92,9 +96,10 @@ proc actions
       if \turn_phase_count! = 6 then
         spr_disable 7
         \speed! = 0
-        \level_done! = 2
+      endif
+      if \turn_phase_count! = 12 then
+      \level_done! = 2
         if \fleet! > 1 then
-          sfx_start 1
           textat 12, 12, "    crashed    "
         else
           textat 12, 12, "   game over   "
@@ -102,6 +107,18 @@ proc actions
       endif
     endif
     \aircraft_altitude = \aircraft_altitude + 4
+    return
+    
+  scrolling_to_ufo:
+    if abs(\aircraft_xpos - \sav_ufo_xpos) < 8 then
+      loop:
+        goto loop
+    endif
+    ''inc \anim_counter!
+    ''if \anim_counter! = 100 then
+    ''  col_no = \save_ufo_xpos / 40
+    ''  
+    ''endif
     return
   
   draw_fuel:

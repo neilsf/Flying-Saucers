@@ -110,13 +110,9 @@ rem -- START NEW GAME
 rem -----------------------------------------------
 
 ri_off
-  
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) & %11101111
-
 call configure_sprites
-
 ri_on
-
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
 rem -- 0: not done 1: done 2: life lost
@@ -125,25 +121,6 @@ fleet! = 4 : wave_countdown! = 7 : ufos_killed = 0
 attack_wave_index = 0 : no_of_ufos_in_this_wave! = 0
 
 game_loop:
-  spr_enable 7
-  let aircraft_xpos = 2560
-  let city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
-  let city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
-  call setup_screen(1)
-  if level_done! = 1 then
-    memset $d9ed, 15, 2
-    textat 14, 12, "attack wave" : textat 25, 12, wave! 
-    
-    for j! = 0 to 3
-      ufo_on![j!] = 0
-      ufo_hit![j!] = 0
-    next j!
-  endif
-  
-  level_done! = 0
-  fuel! = 0
-  speed! = 0 : dir! = 1
-  aircraft_mode! = AIRCRAFT_MODE_REFUEL!
   
   no_of_waves! = \levels![attack_wave_index]
   inc attack_wave_index
@@ -151,10 +128,32 @@ game_loop:
   ufo_count! = \levels![attack_wave_index]
   inc attack_wave_index
   
-  call update_scoretable
-  
   level_loop:
-
+  
+    aircraft_xpos = 2560
+    city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
+    city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
+    
+    call setup_screen(1)
+    call update_scoretable
+    
+    if level_done! = 1 then
+      textat 14, 12, "attack wave" : textat 25, 12, wave! 
+      fleet_at_start! = fleet!
+      
+      for j! = 0 to 3
+        ufo_on![j!] = 0
+        ufo_hit![j!] = 0
+      next j!
+    endif
+    
+    level_done! = 0
+    fuel! = 0
+    speed! = 0 : dir! = 1 : \turning! = 0 : \turn_phase! = 0
+    aircraft_mode! = AIRCRAFT_MODE_REFUEL!
+    \turn_phase! = 0
+    poke \SID_CTRL3, %10000001
+  
     main_loop:
       
       watch RASTER_POS, 230
@@ -177,6 +176,7 @@ game_loop:
           call shift_right
         else
           call poll_collisions
+          call update_scoretable
         endif
       else
         scroll! = scroll! - microspeed!
@@ -186,29 +186,23 @@ game_loop:
           scroll! = scroll! & %00000111
           call shift_left
         else
-          call poll_collisions          
+          call poll_collisions  
+          call update_scoretable
         endif
       endif
-      
-      poke 53280, 4
       
       dec frame_count!
       dec sound_counter!
       
       call actions
       call move_ufos
-      poke 53280, 2
       call update_sprites
-      
-      poke 53280, 0
-      
       call sfx_play
-      
-      
       
       on level_done! goto main_loop, level_done, life_lost
       
       level_done:
+        if wave! = LEVEL_COUNT! then goto game_completed
         inc wave!
         inc fleet!
         for j! = 0 to 200
@@ -224,12 +218,15 @@ game_loop:
         for ii = 0 to 400
           watch \RASTER_POS, 0
         next ii
-        if fleet! = 0 then goto game_over else goto game_loop
+        if fleet! = 0 then goto game_over else goto level_loop
     
-    goto game_loop
+    rem -- Program never gets here:
   
 game_over:
   goto main
+  
+game_completed:
+  print "WOW, complete" : end
 
 instructions:
   poke VIC_CONTROL2, %11001000
@@ -269,12 +266,12 @@ instructions:
   print " or make a u-turn. Press fire to launch"
   print " projectile or down + fire to bomb.{13}"
   
-  print " To avoid losing one aircraft:"
-  print " * Do not hit into any objects."
+  print " To avoid losing the aircraft{13}"
+  print " * Do not crash into any objects."
   print " * Return to the carrier when you're"
   print "   low on fuel.{13}"
 
-  print " The game ends when"
+  print " The game ends when{13}"
   print " * A UFO reaches ground - or -"
   print " * You lose all your fleet{13}"
   
@@ -282,12 +279,22 @@ instructions:
 
   gosub wait_key
   
-  print "{147} Landing"
+  print "{147}{13} Landing"
   print " -------{13}"
   
   print " Approach the aircraft carrier with low"
   print " speed and on low altitude to initiate"
-  print " the landing procedure.{13}"
+  print " the landing procedure. If your speed"
+  print " and altitude are low enough, the auto-"
+  print " pilot will do the landing for you.{13}"
+  print " Scoring"
+  print " -------{13}"
+  print "  1 pt  for each enemy aircraft down"
+  print "  2 pts for each successful landing"
+  print "  5 pts for each completed level"
+  print " +5 pts if level completed without loss{13}"
+  print "{13}{13} GOOD LUCK!{13}{13}"
+  print " press a key to begin..."
  
 
   gosub wait_key

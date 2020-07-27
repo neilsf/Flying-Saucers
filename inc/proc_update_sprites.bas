@@ -74,9 +74,7 @@ rem -- move bullet
       
         spr_setpos i!, x + 173, \ufo_altitude![i!]
         spr_enable i!
-        
-        testlabel:
-        
+       
         rem -- display fade animation if ufo is shot
         if \ufo_hit![i!] = 1 and \frame_count! & %00000011 = 1 then
           spr_setshape i!, \ufo_animphase![i!]
@@ -86,7 +84,6 @@ rem -- move bullet
             \ufo_on![i!] = 0
             \ufo_hit![i!] = 0
             spr_disable i!
-            dec \ufo_count! : inc \ufos_killed : dec \no_of_ufos_in_this_wave! : call update_scoretable
           endif
         else
           rem -- display normal animation if not

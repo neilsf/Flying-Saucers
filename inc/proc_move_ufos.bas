@@ -1,5 +1,7 @@
 proc move_ufos
     
+  if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
+    
   ufo_landed! = 0
   
   if \frame_count! & %01111111 = 0 then
@@ -42,7 +44,14 @@ proc move_ufos
       if \ufo_on![i!] = 1 then
         \ufo_xpos[i!] = \ufo_xpos[i!] + \ufo_current_xspeed[i!]
         \ufo_altitude![i!] = \ufo_altitude![i!] + \ufo_current_yspeed![i!]
-        if \ufo_altitude![i!] >= 234 then textat 12, 12, "   game over   " : end : rem --- TODO complete
+        if \ufo_altitude![i!] >= 234 then
+          textat 12, 12, "   game over   "
+          if \ufo_xpos[i!] <= \aircraft_xpos then \dir! = 0 else \dir! = 1
+          \speed! = 250
+          \sav_ufo_xpos = \ufo_xpos[i!]
+          spr_disable 7
+          \aircraft_mode! = \AIRCRAFT_MODE_SCROLLING_TO_UFO!
+        endif
       endif
     next i!
   endif

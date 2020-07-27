@@ -15,9 +15,9 @@ proc intro
   
   textat 13, 6, "flying saucers"
 
-  textat 7,  9, "code & sfx    csaba fekete"
-  textat 7, 11, "graphics     daniel fekete"
-  textat 7, 14, "press fire button to start"
+  textat 5,  9, "code              csaba fekete"
+  textat 5, 11, "graphics & sfx   daniel fekete"
+  textat 7, 14,   "press fire button to start"
   textat 14,21, "  "
   textat 12,19, " "
   textat  6,20, " "

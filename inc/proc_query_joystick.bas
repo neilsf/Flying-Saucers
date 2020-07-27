@@ -60,7 +60,7 @@ rem ----------------------
     if \turning! = 0 then
       \bullet_on! = 1
       \bullet_ypos! = cast!(rshift(\aircraft_altitude, 2))
-      \bullet_xpos = 166
+      \bullet_xpos = 166 + \dir! * 16
       \bullet_dir! = \dir!
       if joy_1_down!() = 1 then
         \bullet_speed! = \microspeed!
@@ -72,7 +72,7 @@ rem ----------------------
       \bullet_dy! = lifting_to_bullet_dy![\lifting!]
       spr_enable 6
       spr_setshape 6, 223 - \dir!
-      sfx_start 13
+      sfx_start 1
     endif
   endif
   

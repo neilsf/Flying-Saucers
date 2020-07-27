@@ -12,7 +12,7 @@ let speed! = 1
 let dir! = 1
 let frame_count! = 0
 let scroll! = 0
-let score = 0
+let score = 0 : let hiscore = 0
 
 rem -- aircraft status
 rem -- 0: flying
@@ -64,12 +64,13 @@ dim ufo_current_xspeed[4]
 dim ufo_current_yspeed![4]
 
 
-const LEVEL_COUNT = 1
+const LEVEL_COUNT! = 2
 rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
 rem -- pattern for each ufos (255: no ufo)
-data levels![] = 3, 3,   255, 255, 255, 0,    255, 255, 255, 3 ,   255, 255, 255, 5
+data levels![] =  3, 3,   255, 255, 255, 0,    255, 255, 255, 3,    255, 255, 255, 5, ~
+                  3, 3,   255, 255, 255, 14,   255, 255, 255, 13,   255, 255, 255, 12
 
 rem -- pointer to the elements of the above array
 dim attack_wave_index
@@ -92,5 +93,7 @@ let bullet_dir! = 1
 aircraft_mode! = AIRCRAFT_MODE_TAXI!
 fuel! = 0
 
-dim fleet! : dim ufo_count! : dim ufos_killed : dim level_done! : dim wave!
+dim fleet! : dim fleet_at_start! : dim ufo_count! : dim ufos_killed : dim level_done! : dim wave!
 dim microspeed!
+
+dim sav_ufo_xpos
