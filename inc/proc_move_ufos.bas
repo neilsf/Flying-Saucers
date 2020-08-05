@@ -12,8 +12,9 @@ proc move_ufos
     rem -- new wave should not come before the previous one is cleared
     if \no_of_ufos_in_this_wave! = 0 then
       if \wave_countdown! = 0 and \no_of_waves! <> 0 then
+        rem -- launch wave!
         dec \no_of_waves!
-        sfx_start 2
+        sfx_start 8    
         \no_of_ufos_in_this_wave! = 0
         for j! = 0 to 3
           wave_no! = \levels![\attack_wave_index]
@@ -22,6 +23,7 @@ proc move_ufos
             inc \no_of_ufos_in_this_wave!
             \ufo_on![j!] = 1
             \ufo_xpos[j!] = \initial_ufo_posx[wave_no!]
+            \ufo_initial_xpos[j!] = \ufo_xpos[j!]
             \ufo_altitude![j!] = 81: rem 80
           else
             ufo_on![j!] = 0
@@ -45,12 +47,13 @@ proc move_ufos
         \ufo_xpos[i!] = \ufo_xpos[i!] + \ufo_current_xspeed[i!]
         \ufo_altitude![i!] = \ufo_altitude![i!] + \ufo_current_yspeed![i!]
         if \ufo_altitude![i!] >= 234 then
-          textat 12, 12, "   game over   "
           if \ufo_xpos[i!] <= \aircraft_xpos then \dir! = 0 else \dir! = 1
           \speed! = 250
           \sav_ufo_xpos = \ufo_xpos[i!]
           spr_disable 7
+          poke \SID_CTRL3, %10000000
           \aircraft_mode! = \AIRCRAFT_MODE_SCROLLING_TO_UFO!
+          textat 12, 12, "  ufo landed   "
         endif
       endif
     next i!
@@ -58,7 +61,7 @@ proc move_ufos
   
   if ufo_landed! = 1 then print "game over" : end
 
-  data xspeed_table[] =    0, 0, 4, 0,-4, 0, 4, 0
+  data xspeed_table[] =    0, 0, 4, 4, 4, 0,-4, 0
   data yspeed_table![] =   1, 1, 0, 0, 0, 1, 0, 1
     
 endproc

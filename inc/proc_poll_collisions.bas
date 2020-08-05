@@ -4,14 +4,7 @@ proc poll_collisions
 
   aircraft_coll_state! = peek!(\SPR_DATA_COLL)
   
-  if aircraft_coll_state! & %10000000 = %10000000 then
-    \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
-    \turn_phase! = 242 + \dir! * 8
-    \turn_phase_count! = 0
-    poke \SID_CTRL3, %10000000
-    sfx_start 1
-    return
-  endif
+  if aircraft_coll_state! & %10000000 = %10000000 then goto aircraft_hit
 
   spr_hit! = peek!(\SPR_SPR_COLL)
   
@@ -23,21 +16,27 @@ proc poll_collisions
         \ufo_animphase![i!] = 163
         \bullet_on! = 0
         spr_disable 6
-        sfx_start 9
+        sfx_start 2
         inc \score : dec \ufo_count! : inc \ufos_killed : dec \no_of_ufos_in_this_wave! : call update_scoretable
+        if \ufo_count! = 0 then textat 12, 0, "return 2 carrier"
       endif
     next i!
     
     rem -- was it the aircraft?
-    if spr_hit! & %10000000 <> 0 then
-      \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
-      \turn_phase! = 242 + \dir! * 8
-      \turn_phase_count! = 0
-      poke \SID_CTRL3, %10000000
-      sfx_start 1
-    endif
-    
+    if spr_hit! & %10000000 <> 0 then goto aircraft_hit
   endif
+  
+  return
+  
+  aircraft_hit:
+    \aircraft_mode! = \AIRCRAFT_MODE_NOSEDIVING!
+    \turn_phase! = 242 + \dir! * 8
+    \turn_phase_count! = 0
+    \turning! = 0
+    poke \SID_CTRL3, %10000000
+    sfx_start 5
+    call update_scoretable
+    return
     
   data bits![] = 1, 2, 4, 8, 16, 32, 64, 128
   

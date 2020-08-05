@@ -8,20 +8,20 @@ rem ----------------------
 
   if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
  
-  if joy_1_up!() = 1 and \aircraft_altitude > 360 then
-    dec \aircraft_altitude
-    dec \aircraft_altitude
-    \lifting! = 1
+  if joy_1_down!() = 1 or \fuel! = 0 then
+    inc \aircraft_altitude
+    inc \aircraft_altitude
+    \lifting! = 2
   else
-    if joy_1_down!() = 1 then
-      inc \aircraft_altitude
-      inc \aircraft_altitude
-      \lifting! = 2
+    if joy_1_up!() = 1 and \aircraft_altitude > 360 then
+      dec \aircraft_altitude
+      dec \aircraft_altitude
+      \lifting! = 1
     else
       \lifting! = 0
     endif
   endif
-
+  
   rem -- TODO: RESOLVE THIS IF..ELSE NIGHTMARE
   
   if joy_1_right!() = 1 then joy_dir! = 1 
@@ -59,20 +59,21 @@ rem ----------------------
   if joy_1_fire!() = 1 and \bullet_on! = 0 then
     if \turning! = 0 then
       \bullet_on! = 1
-      \bullet_ypos! = cast!(rshift(\aircraft_altitude, 2))
-      \bullet_xpos = 166 + \dir! * 16
       \bullet_dir! = \dir!
       if joy_1_down!() = 1 then
+        \bullet_xpos = 174
+        \bullet_ypos! = cast!(rshift(\aircraft_altitude, 2)) + 2
         \bullet_speed! = \microspeed!
-        \bullet_sound_step = 75
+        sfx_start 4
       else
+        \bullet_xpos = 166 + \dir! * 16
+        \bullet_ypos! = cast!(rshift(\aircraft_altitude, 2))
         \bullet_speed! = \microspeed! + 12
-        \bullet_sound_step = 400
+        sfx_start 0
       endif
       \bullet_dy! = lifting_to_bullet_dy![\lifting!]
       spr_enable 6
       spr_setshape 6, 223 - \dir!
-      sfx_start 1
     endif
   endif
   

@@ -38,6 +38,7 @@ let aircraft_zone! = 14
 rem -- these are actual sprite y positions
 dim ufo_altitude![4]
 dim ufo_xpos[4]
+dim ufo_initial_xpos[4]
 dim ufo_on![4]
 dim ufo_hit![4]
 dim ufo_animphase![4]
@@ -64,13 +65,15 @@ dim ufo_current_xspeed[4]
 dim ufo_current_yspeed![4]
 
 
-const LEVEL_COUNT! = 2
+const LEVEL_COUNT! = 4
 rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
 rem -- pattern for each ufos (255: no ufo)
-data levels![] =  3, 3,   255, 255, 255, 0,    255, 255, 255, 3,    255, 255, 255, 5, ~
-                  3, 3,   255, 255, 255, 14,   255, 255, 255, 13,   255, 255, 255, 12
+data levels![] =  3, 3,   255, 255, 255, 2,    255, 255, 255, 3,    255, 255, 255, 5, ~
+                  3, 3,   255, 255, 255, 14,   255, 255, 255, 13,   255, 255, 255, 12, ~
+                  3, 6,   255, 255,   2, 3,    255, 255,   3, 4,    255, 255,   4, 5, ~
+                  3, 6,   255, 255,  13, 14,   255, 255,  12, 13,   255, 255,  11, 12
 
 rem -- pointer to the elements of the above array
 dim attack_wave_index

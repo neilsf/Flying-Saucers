@@ -63,7 +63,7 @@ poke SID_AD3, %00100000
 poke SID_SR3, %11110000
 ; filters
 poke $d415, 0
-poke $d416, %00000111
+poke $d416, %00000100
 poke $d417, %01000100
 poke $d418, %00011111
 
@@ -99,10 +99,11 @@ rem -----------------------------------------------
 rem -- Set up raster interrupts 
 rem -----------------------------------------------
 
-ri_isr_count! = 3
+ri_isr_count! = 4
 ri_set_isr 0, @interrupt1, 50
 ri_set_isr 1, @interrupt2, 90
 ri_set_isr 2, @interrupt3, 176
+ri_set_isr 3, @sfx_play, 0
 ri_syshandler_off
 
 rem -----------------------------------------------
@@ -115,9 +116,9 @@ call configure_sprites
 ri_on
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
-rem -- 0: not done 1: done 2: life lost
-level_done! = 1 : wave! = 1
-fleet! = 4 : wave_countdown! = 7 : ufos_killed = 0
+rem -- reset variables before starting a new game
+level_done! = 1 : wave! = 1 : score = 0
+fleet! = 3 : wave_countdown! = 7 : ufos_killed = 0
 attack_wave_index = 0 : no_of_ufos_in_this_wave! = 0
 
 game_loop:
@@ -130,11 +131,11 @@ game_loop:
   
   level_loop:
   
-    aircraft_xpos = 2560
+    aircraft_xpos = 2560 : aircraft_altitude = 848
     city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
     city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
     
-    call setup_screen(1)
+    call setup_screen(0)
     call update_scoretable
     
     if level_done! = 1 then
@@ -149,10 +150,12 @@ game_loop:
     
     level_done! = 0
     fuel! = 0
-    speed! = 0 : dir! = 1 : \turning! = 0 : \turn_phase! = 0
     aircraft_mode! = AIRCRAFT_MODE_REFUEL!
-    \turn_phase! = 0
+    speed! = 0 : dir! = 1 : lifting! = 0
+    frame_count! = 0 : scroll! = 0
+    turning! = 0 : turn_phase! = 0 : turn_phase_count! = 0
     poke \SID_CTRL3, %10000001
+    sfx_start 1
   
     main_loop:
       
@@ -197,33 +200,51 @@ game_loop:
       call actions
       call move_ufos
       call update_sprites
-      call sfx_play
       
-      on level_done! goto main_loop, level_done, life_lost
+      on level_done! goto main_loop, level_done, life_lost, game_over
       
       level_done:
         if wave! = LEVEL_COUNT! then goto game_completed
         inc wave!
         inc fleet!
-        for j! = 0 to 200
+        poke \SID_CTRL3, %10000000
+        sfx_start 9
+        for ii = 0 to 400
           watch \RASTER_POS, 0
-        next j!
+        next ii
         goto game_loop
         
       life_lost:
         dec fleet!
         fuel! = 0
         aircraft_altitude = 848
-        let aircraft_xpos = 2560
+        aircraft_xpos = 2560
+        if \ufo_count! = 0 then level_done! = 1 : goto level_done
+        rem -- put ufos back to top of screen
+        rem -- otherwise it's too hard to kill them
+        for j! = 0 to 3
+          if ufo_on![j!] = 1 then
+            \ufo_initial_xpos[j!] = \ufo_initial_xpos[j!]
+            \ufo_altitude![j!] = 81
+          endif
+        next j!
+        \wave_countdown! = 7
+        
         for ii = 0 to 400
           watch \RASTER_POS, 0
         next ii
-        if fleet! = 0 then goto game_over else goto level_loop
+        if fleet! > 0 then goto level_loop
     
-    rem -- Program never gets here:
-  
-game_over:
-  goto main
+      game_over:
+        sfx_start 7
+        textat 12, 12, "   game over   "
+        if \score > 0 and \score = \hiscore then
+          textat 14, 13, "new hiscore" : memset 55830, 11, 2
+        endif
+        for ii = 0 to 400
+          watch \RASTER_POS, 0
+        next ii
+        goto main
   
 game_completed:
   print "WOW, complete" : end
@@ -238,7 +259,7 @@ instructions:
   print " aircraft and your mission is to save"
   print " the city from an alien invasion. The"
   print " command is simple:{13}"
-  print " ** Prevent any UFOs from landing! **{13}"
+  print " ** Prevent the enemy from landing! **{13}"
   
   print " Gameplay"
   print " --------{13}"
@@ -271,8 +292,8 @@ instructions:
   print " * Return to the carrier when you're"
   print "   low on fuel.{13}"
 
-  print " The game ends when{13}"
-  print " * A UFO reaches ground - or -"
+  print " The game is over when{13}"
+  print " * 3 or more UFOs reach the ground, or"
   print " * You lose all your fleet{13}"
   
   print " press a key to continue..."
@@ -303,14 +324,15 @@ instructions:
   wait_key:
     if inkey!() = 0 then goto wait_key
     return
-    
-rem -- graphics data
+
+
+rem -- graphics data    
 origin $1ffe
 
 rem -- chars ($2000-2800)
 incbin "resources/charset.64c"
 
-rem -- sprites ($2800-$3c7a)
+rem -- sprites ($2800-$3fff)
 incbin "resources/sprites.bin"
 
 rem -- map ($4000-)
@@ -319,8 +341,10 @@ incbin "resources/graphics.bin"
 
 origin $5440
 incbin "resources/Black_Hawk5400_cut_headless.sid"
-rem -- $6400-
+rem -- $6400
+origin $6400
 incbin "resources/logo.bin"
-
 sounds:
 incbin "resources/sfx.bin"
+
+rem --incbin "resources/title_cut.64c"

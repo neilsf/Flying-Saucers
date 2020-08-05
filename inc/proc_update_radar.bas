@@ -5,10 +5,15 @@ rem -----------------------
 
 proc update_radar
 
+  if \ufo_count! = 0 then
+    rem -- blink text
+    memset 55308, 16, rshift!(\frame_count! & %00100000, 5) * 5
+  endif
+
   memcpy @radar_2nd_row!, 1116, 16
   memcpy @radar_3rd_row!, 1156, 16
  
-  spr_setposx 5, \aircraft_xpos / 40 + 112
+  spr_setposx 5, \aircraft_xpos / 40 + 120
 
   for i! = 0 to 3
     if \ufo_on![i!] = 1 then

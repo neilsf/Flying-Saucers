@@ -12,10 +12,12 @@ proc actions
   on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving, scrolling_to_ufo
   
   taxi:
-    if \frame_count! & %01111111 = 0 then
+    if \fuel! > 0 and \frame_count! & %01111111 = 0 then
       rem -- decrease fuel
       dec \fuel!
       gosub erase_fuel
+    else
+      rem --
     endif
     rem -- check if autopilot should take over
     if \aircraft_altitude >= 780 and \aircraft_altitude <= 848 then
@@ -84,6 +86,7 @@ proc actions
         \level_done! = 1
       else
         \aircraft_mode! = \AIRCRAFT_MODE_REFUEL!
+        sfx_start 1
         textat 14, 12, "  refueling   "
       endif
     endif
@@ -97,13 +100,9 @@ proc actions
         spr_disable 7
         \speed! = 0
       endif
-      if \turn_phase_count! = 12 then
-      \level_done! = 2
-        if \fleet! > 1 then
-          textat 12, 12, "    crashed    "
-        else
-          textat 12, 12, "   game over   "
-        endif
+      if \turn_phase_count! = 24 then
+        \level_done! = 2
+        textat 12, 12, "    crashed    "
       endif
     endif
     \aircraft_altitude = \aircraft_altitude + 4
@@ -111,14 +110,8 @@ proc actions
     
   scrolling_to_ufo:
     if abs(\aircraft_xpos - \sav_ufo_xpos) < 8 then
-      loop:
-        goto loop
+      \level_done! = 3
     endif
-    ''inc \anim_counter!
-    ''if \anim_counter! = 100 then
-    ''  col_no = \save_ufo_xpos / 40
-    ''  
-    ''endif
     return
   
   draw_fuel:
