@@ -2,8 +2,6 @@ proc move_ufos
     
   if \aircraft_mode! <> \AIRCRAFT_MODE_TAXI! then return
     
-  ufo_landed! = 0
-  
   if \frame_count! & %01111111 = 0 then
     rem -- launch new attack wave if time
     xspeed = xspeed_table[\wave_countdown!]
@@ -48,9 +46,8 @@ proc move_ufos
         \ufo_altitude![i!] = \ufo_altitude![i!] + \ufo_current_yspeed![i!]
         if \ufo_altitude![i!] >= 234 then
           if \ufo_xpos[i!] <= \aircraft_xpos then \dir! = 0 else \dir! = 1
-          \speed! = 250
           \sav_ufo_xpos = \ufo_xpos[i!]
-          spr_disable 7
+          spr_disable 7 : \turning! = 0
           poke \SID_CTRL3, %10000000
           \aircraft_mode! = \AIRCRAFT_MODE_SCROLLING_TO_UFO!
           textat 12, 12, "  ufo landed   "
@@ -59,8 +56,6 @@ proc move_ufos
     next i!
   endif
   
-  if ufo_landed! = 1 then print "game over" : end
-
   data xspeed_table[] =    0, 0, 4, 4, 4, 0,-4, 0
   data yspeed_table![] =   1, 1, 0, 0, 0, 1, 0, 1
     

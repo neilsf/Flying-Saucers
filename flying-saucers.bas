@@ -117,9 +117,11 @@ ri_on
 poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 
 rem -- reset variables before starting a new game
-level_done! = 1 : wave! = 1 : score = 0
+level_done! = 1 : wave! = 1 : rem 1!!
+score = 0
 fleet! = 3 : wave_countdown! = 7 : ufos_killed = 0
-attack_wave_index = 0 : no_of_ufos_in_this_wave! = 0
+attack_wave_index = 0 : rem 0!
+no_of_ufos_in_this_wave! = 0
 
 game_loop:
   
@@ -247,7 +249,14 @@ game_loop:
         goto main
   
 game_completed:
-  print "WOW, complete" : end
+  ri_off
+  call setup_screen(2)
+  \ri_isr_count! = 1
+  ri_set_isr 0, @music_player, 250
+  sys $5443
+  ri_on
+  loop4ever:
+    goto loop4ever
 
 instructions:
   poke VIC_CONTROL2, %11001000

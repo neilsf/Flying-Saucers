@@ -109,9 +109,8 @@ proc actions
     return
     
   scrolling_to_ufo:
-    if abs(\aircraft_xpos - \sav_ufo_xpos) < 8 then
-      \level_done! = 3
-    endif
+    if \speed! < 128 then inc \speed!
+    if abs(\aircraft_xpos - \sav_ufo_xpos) < 8 then \level_done! = 3
     return
   
   draw_fuel:
