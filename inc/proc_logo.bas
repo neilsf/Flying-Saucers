@@ -1,5 +1,7 @@
 proc logo
   
+  disableirq
+  
   poke \VIC_CONTROL2, %11001100
   
   memset \SCREEN, 1000, 32
@@ -51,13 +53,14 @@ proc logo
     
   textat 16, 13, "present"
   
-  \ri_isr_count! = 1
-  ri_set_isr 0, @music_player, 250
   sys $5443
+  \ri_isr_count! = 1
+  ri_syshandler_off
+  ri_set_isr 0, @music_player, 250
   ri_on
-  
-  for i = 0 to 600 : rem 200
-    watch \RASTER_POS, 0
+
+  for i = 0 to 600
+    watch \RASTER_POS, 170
   next i
   
   for j! = 0 to 6
@@ -70,9 +73,11 @@ proc logo
   textat 14, 10, "their first"
   textat 16, 12, "release"
   
-  for i = 0 to 530 : rem 530
-    watch \RASTER_POS, 0
+  for i = 0 to 530
+    watch \RASTER_POS, 170
   next i
+  
+  enableirq
   
   return
   

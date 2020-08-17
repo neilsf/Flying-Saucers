@@ -251,10 +251,10 @@ game_loop:
 game_completed:
   ri_off
   call setup_screen(2)
-  \ri_isr_count! = 1
-  ri_set_isr 0, @music_player, 250
-  sys $5443
-  ri_on
+  ''\ri_isr_count! = 1
+  ''ri_set_isr 0, @music_player, 250
+  ''sys $5443
+  ''ri_on
   loop4ever:
     goto loop4ever
 
