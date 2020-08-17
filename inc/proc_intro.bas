@@ -13,7 +13,7 @@ proc intro
   poke \VIC_CONTROL2, \VIC_CTR_DEFAULT!
   call setup_screen(1)
   
-  ''poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
+  if \PAL_NTSC! = 0 then poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
   
   animphase! = 0
   landing_bacon_animphase! = 0
