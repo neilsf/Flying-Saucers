@@ -59,7 +59,7 @@ proc logo
   ri_set_isr 0, @music_player, 250
   ri_on
 
-  for i = 0 to 600
+  for i = 0 to 720 : rem 600 for PAL, 720 for NTSC
     watch \RASTER_POS, 170
   next i
   
@@ -73,7 +73,7 @@ proc logo
   textat 14, 10, "their first"
   textat 16, 12, "release"
   
-  for i = 0 to 530
+  for i = 0 to 636: rem 530 for PAL, 636 for NTSC
     watch \RASTER_POS, 170
   next i
   

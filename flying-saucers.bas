@@ -10,7 +10,15 @@ rem -------------------------
 
 debug! = 0
 
+rem -- UNCOMMENT IF COMPILING FOR NTSC
+ ntsc_frames! = 0
+rem ----------------------------------
+
 proc music_player
+  rem -- UNCOMMENT IF COMPILING FOR NTSC
+  inc \ntsc_frames!
+  if \ntsc_frames! = 6 then \ntsc_frames! = 0 : return
+  rem ----------------------------------
   sys $5440
 endproc
 
@@ -159,10 +167,18 @@ game_loop:
     poke \SID_CTRL3, %10000001
     sfx_start 1
   
+    rem -- UNCOMMENT IF COMPILING FOR NTSC
+    ntsc_frames! = 0
+    rem ----------------------------------
+  
     main_loop:
       
       watch RASTER_POS, 230
-
+      rem -- UNCOMMENT IF COMPILING FOR NTSC
+      inc ntsc_frames!
+      if ntsc_frames! = 6 then ntsc_frames! = 0 : watch RASTER_POS, 220 : goto main_loop
+      rem ----------------------------------
+      
       call query_joystick
       call update_radar
       
