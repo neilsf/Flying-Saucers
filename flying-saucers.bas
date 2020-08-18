@@ -30,6 +30,14 @@ proc music_player
   sys $5440
 endproc
 
+proc music_player2
+  if \ntsc_pal! = 0 then
+    inc \ntsc_frames!
+    if \ntsc_frames! = 6 then \ntsc_frames! = 0 : return
+  endif
+  sys $6721
+endproc
+
 include "ext/xcb-ext-sprite.bas"
 include "ext/xcb-ext-joystick.bas"
 include "ext/xcb-ext-rasterinterrupt.bas"
@@ -135,12 +143,14 @@ poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 rem -- reset variables before starting a new game
 level_done! = 1 : wave! = 1 : rem 10
 score = 0
-fleet! = 3 : wave_countdown! = 7 : ufos_killed = 0
+fleet! = 3 : wave_countdown! = 4 : ufos_killed = 0
 attack_wave_index = 0: rem 126 
 no_of_ufos_in_this_wave! = 0
 
+ufo_colors! = 2
+
 game_loop:
-  
+
   no_of_waves! = \levels![attack_wave_index]
   inc attack_wave_index
   
@@ -148,7 +158,7 @@ game_loop:
   inc attack_wave_index
   
   level_loop:
-  
+ 
     aircraft_xpos = 2560 : aircraft_altitude = 848
     city_map_ptr_right = CITY_MAP_DEFAULT_PTR_RIGHT
     city_map_ptr_left  = CITY_MAP_DEFAULT_PTR_LEFT
@@ -163,7 +173,9 @@ game_loop:
       for j! = 0 to 3
         ufo_on![j!] = 0
         ufo_hit![j!] = 0
+        spr_setcolor j!, ufo_colors!
       next j!
+      if ufo_colors! = 5 then ufo_colors! = 2 else ufo_colors! = 5
     endif
     
     level_done! = 0
@@ -273,20 +285,19 @@ game_loop:
   
 game_completed:
   ri_off
+  ntsc_frames! = 0
+  poke $d022, 15 : poke $d023, 12
   call setup_screen(2)
-  ''\ri_isr_count! = 1
-  ''ri_set_isr 0, @music_player, 250
-  ''sys $5443
-  ''ri_on
+  call update_scoretable
+  \ri_isr_count! = 1
+  ri_set_isr 0, @music_player2, 250
+  sys $6748
+  ri_on
   loop4ever:
     goto loop4ever
 
 instructions:
   include "inc/instructions.bas"
-
-asm "
-  ECHO *
-"
 
 rem -- graphics data    
 
@@ -311,9 +322,6 @@ incbin "resources/Black_Hawk5400_cut_headless.sid"
 sounds:
 incbin "resources/sfx.bin"
 
-rem -- This must be moved to $C000
 origin $6700
 end_music:
-incbin "resources/Noice_Anthem.sid"
-
-rem --incbin "resources/title_cut.64c"
+incbin "resources/Noice_Anthem6700_cut_headless.sid"

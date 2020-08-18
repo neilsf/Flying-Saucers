@@ -76,14 +76,16 @@ rem -- move bullet
         spr_enable i!
        
         rem -- display fade animation if ufo is shot
-        if \ufo_hit![i!] = 1 and \frame_count! & %00000011 = 1 then
-          spr_setshape i!, \ufo_animphase![i!]
-          inc \ufo_animphase![i!]
-          rem -- if animation is over
-          if \ufo_animphase![i!] = 167 then
-            \ufo_on![i!] = 0
-            \ufo_hit![i!] = 0
-            spr_disable i!
+        if \ufo_hit![i!] = 1 then
+          if \frame_count! & %00000011 = 1 then
+            spr_setshape i!, \ufo_animphase![i!]
+            inc \ufo_animphase![i!]
+            rem -- if animation is over
+            if \ufo_animphase![i!] = 167 then
+              \ufo_on![i!] = 0
+              \ufo_hit![i!] = 0
+              spr_disable i!
+            endif
           endif
         else
           rem -- display normal animation if not
