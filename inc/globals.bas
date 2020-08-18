@@ -65,7 +65,7 @@ dim ufo_current_xspeed[4]
 dim ufo_current_yspeed![4]
 
 
-const LEVEL_COUNT! = 8
+const LEVEL_COUNT! = 10
 rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
@@ -77,7 +77,10 @@ data levels![] =  3, 3,   255, 255, 255, 2,    255, 255, 255, 3,    255, 255, 25
                   3, 6,   255, 255,  13, 14,   255, 255,  12, 13,   255, 255,  11, 12, ~
                   4, 8,   255, 255, 10, 11,    255, 255,  11, 12,   255, 255,  12, 13,    255, 255,  13, 14, ~
                   4, 8,   255, 255, 5, 6,      255, 255, 4, 5,      255, 255, 3, 4,       255, 255, 2, 3, ~
-                  1, 3,   255, 4, 5, 6
+                  1, 3,   255, 4, 5, 6, ~
+                  2, 6,   255, 14,13,12,       255, 4, 5, 6, ~
+                  4,12,   255, 14,13,12,       255, 4, 5, 6,        255, 2, 3, 4,         255, 13, 12, 11
+                  
 
 rem -- pointer to the elements of the above array
 dim attack_wave_index
