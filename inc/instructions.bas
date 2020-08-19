@@ -1,5 +1,5 @@
   poke VIC_CONTROL2, %11001000
-  print "{147}{14}{8}"
+  print "{14}{8}"
   print " Welcome to FLYING SAUCERS!"
   print " =========================={13}"
   
