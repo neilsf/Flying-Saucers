@@ -12,12 +12,11 @@ proc actions
   on \aircraft_mode! goto taxi, refuel, take_off, landing, nosediving, scrolling_to_ufo
   
   taxi:
-    if \fuel! > 0 and \frame_count! & %01111111 = 0 then
+    if \fuel! > 0 and \distance_taken > 400 then
       rem -- decrease fuel
       dec \fuel!
       gosub erase_fuel
-    else
-      rem --
+      \distance_taken = 0
     endif
     rem -- check if autopilot should take over
     if \aircraft_altitude >= 780 and \aircraft_altitude <= 848 then
@@ -50,6 +49,7 @@ proc actions
         anim_counter! = 0
         \aircraft_mode! = \AIRCRAFT_MODE_TAKE_OFF!
         textat 14, 12, " on autopilot "
+        \distance_taken = 0
       endif
     endif
     return

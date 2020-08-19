@@ -1,5 +1,5 @@
 rem -------------------------
-rem -- Flying saucers
+rem -- FLYING SAUCERS
 rem --
 rem -- Written by
 rem -- Csaba Fekete
@@ -10,6 +10,9 @@ rem -------------------------
 
 debug! = 0
 
+rem -- init VIC and I/O, 
+rem -- detect NTSC or PAL system
+sys $ff81
 ntsc_pal! = peek!(678) : rem 0 = NTSC, 1 = PAL
 
 if ntsc_pal! = 0 then
@@ -176,6 +179,7 @@ game_loop:
         spr_setcolor j!, ufo_colors!
       next j!
       if ufo_colors! = 5 then ufo_colors! = 2 else ufo_colors! = 5
+      wave_countdown! = 4
     endif
     
     level_done! = 0
@@ -202,6 +206,7 @@ game_loop:
       call update_radar
       
       microspeed! = rshift!(speed!, 4)
+      distance_taken = distance_taken + cast(microspeed!)
 
       rem --
       rem -- scroll the stage to left or right
@@ -298,9 +303,12 @@ game_completed:
 
 instructions:
   include "inc/instructions.bas"
-
-rem -- graphics data    
-
+  
+rem -----------------------------------------------
+rem -- Resource files included in the program
+rem -- as binary data
+rem -----------------------------------------------
+  
 origin $1e00
 rem -- logo sprites
 incbin "resources/logo.bin"
@@ -312,8 +320,8 @@ incbin "resources/charset.64c"
 rem -- sprites ($2800-$3fff)
 incbin "resources/sprites.bin"
 
-rem -- map ($4000-)
 origin $4000
+rem -- tile map ($4000-)
 incbin "resources/graphics.bin"
 
 origin $5440
@@ -323,5 +331,4 @@ sounds:
 incbin "resources/sfx.bin"
 
 origin $6700
-end_music:
 incbin "resources/Noice_Anthem6700_cut_headless.sid"

@@ -106,4 +106,6 @@ fuel! = 0
 dim fleet! : dim fleet_at_start! : dim ufo_count! : dim ufos_killed : dim level_done! : dim wave!
 dim microspeed!
 
+dim distance_taken
+
 dim sav_ufo_xpos
