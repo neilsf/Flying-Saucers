@@ -15,20 +15,9 @@ proc update_scoretable
   if \hiscore < \score then \hiscore = \score
   
   textat 2, 3, \score
-  rem curpos 2, 3 : print "{GREEN}";
-  rem if \score < 10   then print "000", \score; : poke 53280, 2 : goto print_hi
-  rem if \score < 100  then print "00", \score; : goto print_hi
-  rem if \score < 1000 then print "0", \score; : goto print_hi
-  rem print \score;
   
   print_hi:
   
   textat 7, 3, \hiscore
-  rem curpos 7, 3: print "{RED}";
-  rem if \hiscore < 10   then print "000", \hiscore; : poke 53280, 0 : return
-  rem if \hiscore < 100  then print "00", \hiscore;: return
-  rem if \hiscore < 1000 then print "0", \hiscore; : return
-  rem print \hiscore;
-  
 
 endproc

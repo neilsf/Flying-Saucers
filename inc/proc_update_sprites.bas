@@ -89,7 +89,12 @@ rem -- move bullet
           endif
         else
           rem -- display normal animation if not
-          spr_setshape i!, ufo_anim![rshift!(\frame_count! & %00110000, 4)]
+          if \ufo_has_shield![i!] = 1 then
+            anim! = ufo_shield_anim![rshift!(\frame_count! & %00110000, 4)]
+          else
+            anim! = ufo_anim![rshift!(\frame_count! & %00110000, 4)]
+          endif
+          spr_setshape i!, anim!
         endif
         
       else
@@ -105,5 +110,6 @@ rem -- move bullet
   data turn_speed![] = 48, 46, 44, 42, 40, 38, 36, 34, 32, 32, 32, 32, 34, 36, 38, 40, 42, 44, 46, 48, 48
   data switchdir![] = 1, 0
   data ufo_anim![] = 160, 161, 162, 161
+  data ufo_shield_anim![] = 224, 225, 226, 225
   data bullet_dx[] = 12, 12, 0, 0
 endproc

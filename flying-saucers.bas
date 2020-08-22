@@ -150,9 +150,10 @@ fleet! = 3 : wave_countdown! = 4 : ufos_killed = 0
 attack_wave_index = 0: rem 126 
 no_of_ufos_in_this_wave! = 0
 
-ufo_colors! = 2
-
 game_loop:
+
+  shields_in_this_level! = \levels![attack_wave_index]
+  inc attack_wave_index
 
   no_of_waves! = \levels![attack_wave_index]
   inc attack_wave_index
@@ -176,9 +177,7 @@ game_loop:
       for j! = 0 to 3
         ufo_on![j!] = 0
         ufo_hit![j!] = 0
-        spr_setcolor j!, ufo_colors!
       next j!
-      if ufo_colors! = 5 then ufo_colors! = 2 else ufo_colors! = 5
       wave_countdown! = 4
     endif
     
@@ -266,12 +265,12 @@ game_loop:
         rem -- otherwise it's too hard to kill them
         for j! = 0 to 3
           if ufo_on![j!] = 1 then
-            \ufo_initial_xpos[j!] = \ufo_initial_xpos[j!]
+            \ufo_xpos[j!] = \ufo_initial_xpos[j!]
             \ufo_altitude![j!] = 81
           endif
         next j!
         \wave_countdown! = 7
-        
+        call update_scoretable
         for ii = 0 to 400
           watch \RASTER_POS, 0
         next ii
