@@ -20,12 +20,13 @@ proc poll_collisions
           spr_disable 6
           sfx_start 2
           inc \score : dec \ufo_count! : inc \ufos_killed : dec \no_of_ufos_in_this_wave! : call update_scoretable
-          if \no_of_ufos_in_this_wave! = 0 then \wave_countdown! = 2'
+          if \no_of_ufos_in_this_wave! = 0 then \wave_countdown! = 2
           if \ufo_count! = 0 then textat 12, 0, "return 2 carrier"
         else
           \ufo_has_shield![i!] = 0
           \bullet_on! = 0
           spr_disable 6
+          sfx_start 3
         endif
         i! = 3
       endif
