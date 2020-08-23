@@ -146,7 +146,7 @@ poke \VIC_CONTROL1, peek!(\VIC_CONTROL1) | %00010000
 rem -- reset variables before starting a new game
 level_done! = 1 : wave! = 1 : rem 10
 score = 0
-fleet! = 3 : wave_countdown! = 4 : ufos_killed = 0
+fleet! = 3 : wave_countdown! = 4
 attack_wave_index = 0: rem 126 
 no_of_ufos_in_this_wave! = 0
 

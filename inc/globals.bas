@@ -72,6 +72,7 @@ rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
 rem -- pattern for each ufos (255: no ufo)
+rem -- BUG IN LEVEL 8
 data levels![] =  ~
                   0, 3, 3,   255, 255, 255, 2,    255, 255, 3, 255,    255, 5, 255, 255, ~
                   1, 3, 3,   255, 255, 255, 2,    255, 255, 3, 255,    255, 5, 255, 255, ~
@@ -116,7 +117,7 @@ let bullet_dir! = 1
 aircraft_mode! = AIRCRAFT_MODE_TAXI!
 fuel! = 0
 
-dim fleet! : dim fleet_at_start! : dim ufo_count! : dim ufos_killed : dim level_done! : dim wave!
+dim fleet! : dim fleet_at_start! : dim ufo_count! : dim level_done! : dim wave!
 dim microspeed!
 dim distance_taken
 dim sav_ufo_xpos

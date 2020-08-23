@@ -12,14 +12,18 @@ proc poll_collisions
   if spr_hit! & %11000000 <> 0 then
     i! = 0
     repeat
-      if \ufo_hit![i!] = 0 and spr_hit! & %00111111 = bits![i!] then
+      rem TODO Check if ufo is on
+      if \ufo_hit![i!] ^ \ufo_on![i!] = 1 and spr_hit! & %00001111 = bits![i!] then
         if \ufo_has_shield![i!]= 0 then
           \ufo_hit![i!] = 1
           \ufo_animphase![i!] = 163
           \bullet_on! = 0
           spr_disable 6
           sfx_start 2
-          inc \score : dec \ufo_count! : inc \ufos_killed : dec \no_of_ufos_in_this_wave! : call update_scoretable
+          inc \score : dec \ufo_count! : dec \no_of_ufos_in_this_wave! : call update_scoretable
+          rem -- was it the aircraft?
+          if spr_hit! & %11000000 = %10000000 then gosub aircraft_hit
+          
           if \no_of_ufos_in_this_wave! = 0 then \wave_countdown! = 2
           if \ufo_count! = 0 then textat 12, 0, "return 2 carrier"
         else
@@ -32,9 +36,6 @@ proc poll_collisions
       endif
       inc i!
     until i! = 4
-    
-    rem -- was it the aircraft?
-    if spr_hit! & %11000000 = %10000000 then goto aircraft_hit
   endif
   
   return
