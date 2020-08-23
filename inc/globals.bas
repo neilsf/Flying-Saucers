@@ -72,7 +72,7 @@ rem -- 1st number: no of waves in a level
 rem -- 2nd number: no of ufos in a level
 rem -- consecutive numbers (group of 4): no of attack wave
 rem -- pattern for each ufos (255: no ufo)
-rem -- BUG IN LEVEL 8
+
 data levels![] =  ~
                   0, 3, 3,   255, 255, 255, 2,    255, 255, 3, 255,    255, 5, 255, 255, ~
                   1, 3, 3,   255, 255, 255, 2,    255, 255, 3, 255,    255, 5, 255, 255, ~
@@ -95,7 +95,6 @@ data levels![] =  ~
                   1, 6, 12,  2, 3,255,255,       13, 14,255,255,       3, 4,255,255,         12,13,255,255,        4,5,255,255,      11,12,255,255, ~
                   0, 4, 16,  2, 3, 4, 5,         9, 10, 11, 12,       3, 4, 5, 6,            10, 11, 12, 13
                   
-
 rem -- pointer to the elements of the above array
 dim attack_wave_index
 rem -- wave counter within a level
